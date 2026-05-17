@@ -1,0 +1,1819 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hackathon Playbook · 黑客松手册</title>
+<meta name="description" content="A bilingual interactive playbook for our video-production hackathon — architecture, team, workflow, prompts." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Geist:wght@300..700&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0E0E10',
+          paper: '#FAF8F2',
+          cream: '#F3EFE3',
+          line: '#1f1f23',
+          dim: '#6b6b73',
+          c1: '#2563EB', // blue
+          c2: '#16A34A', // green
+          c3: '#7C3AED', // purple
+          c4: '#EA580C', // orange
+          c5: '#0D9488', // teal
+          c6: '#2563EB', // hero blue accent
+          warn: '#DC2626',
+          amber: '#F59E0B',
+        },
+        fontFamily: {
+          display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+          body: ['"Geist"', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
+          serif: ['"Instrument Serif"', 'serif'],
+          mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          zh: ['"Noto Sans SC"', '"Geist"', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+  :root {
+    --paper: #FAF8F2;
+    --cream: #F3EFE3;
+    --ink: #0E0E10;
+    --dim: #6b6b73;
+  }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Geist', 'Noto Sans SC', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    background-image:
+      radial-gradient(circle at 8% 6%, rgba(37,99,235,0.06), transparent 32%),
+      radial-gradient(circle at 92% 14%, rgba(234,88,12,0.05), transparent 30%),
+      radial-gradient(circle at 50% 96%, rgba(22,163,74,0.05), transparent 35%);
+    background-attachment: fixed;
+  }
+  .grain::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/></svg>");
+    mix-blend-mode: multiply;
+  }
+  .dotgrid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(14,14,16,0.08) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  .display { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-variation-settings: 'opsz' 60, 'wght' 700; letter-spacing: -0.02em; }
+  .display-tight { letter-spacing: -0.035em; }
+  .serif-it { font-family: 'Instrument Serif', serif; font-style: italic; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal-stagger > * { opacity: 0; transform: translateY(14px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+  .reveal-stagger.in > * { opacity: 1; transform: translateY(0); }
+  .reveal-stagger.in > *:nth-child(1) { transition-delay: .04s; }
+  .reveal-stagger.in > *:nth-child(2) { transition-delay: .12s; }
+  .reveal-stagger.in > *:nth-child(3) { transition-delay: .20s; }
+  .reveal-stagger.in > *:nth-child(4) { transition-delay: .28s; }
+  .reveal-stagger.in > *:nth-child(5) { transition-delay: .36s; }
+  .reveal-stagger.in > *:nth-child(6) { transition-delay: .44s; }
+  .reveal-stagger.in > *:nth-child(7) { transition-delay: .52s; }
+  .reveal-stagger.in > *:nth-child(8) { transition-delay: .60s; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .55rem 1rem;
+    border: 1px solid rgba(14,14,16,0.18);
+    background: white;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    transition: all .2s ease;
+  }
+  .btn:hover { background: var(--ink); color: white; border-color: var(--ink); }
+  .btn-ink {
+    background: var(--ink); color: white; border-color: var(--ink);
+  }
+  .btn-ink:hover { background: #2a2a30; }
+
+  /* Tag chips */
+  .chip {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 0.72rem; letter-spacing: .04em; text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Card surface */
+  .surface {
+    background: white;
+    border: 1px solid rgba(14,14,16,0.08);
+    border-radius: 18px;
+    box-shadow: 0 1px 0 rgba(14,14,16,0.02), 0 12px 32px -20px rgba(14,14,16,0.18);
+  }
+  .surface-flat {
+    background: white;
+    border: 1px solid rgba(14,14,16,0.08);
+    border-radius: 14px;
+  }
+
+  /* Marquee */
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .marquee-track { animation: marquee 50s linear infinite; }
+
+  /* Float blob */
+  @keyframes floaty {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    50% { transform: translate(12px,-18px) rotate(2deg); }
+  }
+  .floaty { animation: floaty 9s ease-in-out infinite; }
+  .floaty-slow { animation: floaty 14s ease-in-out infinite; }
+
+  /* Dashed connector */
+  .conn-dash {
+    background-image: linear-gradient(to right, rgba(14,14,16,0.4) 50%, transparent 0%);
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+    background-position: 0 center;
+    height: 1px;
+  }
+
+  /* Flow packet */
+  @keyframes packetFlow {
+    0% { left: 0%; opacity: 0; }
+    8% { opacity: 1; }
+    92% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+  .packet { animation: packetFlow 4.5s cubic-bezier(.55,.05,.45,.95) infinite; }
+
+  /* Lang switch */
+  .lang-pill {
+    position: relative;
+    display: inline-flex;
+    background: rgba(14,14,16,0.06);
+    border-radius: 999px;
+    padding: 3px;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+  .lang-pill button {
+    position: relative; z-index: 2;
+    padding: 5px 14px;
+    border-radius: 999px;
+    color: var(--dim);
+    transition: color .25s ease;
+    line-height: 1;
+  }
+  .lang-pill button.active { color: white; }
+  .lang-pill .slider {
+    position: absolute; top: 3px; bottom: 3px;
+    width: calc(50% - 3px);
+    background: var(--ink);
+    border-radius: 999px;
+    transition: transform .35s cubic-bezier(.4,.0,.2,1);
+    z-index: 1;
+  }
+
+  /* Mock app */
+  .mockup {
+    background: #FBFAF6;
+    border: 1px solid rgba(14,14,16,0.1);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px -40px rgba(14,14,16,0.3);
+    overflow: hidden;
+  }
+  .mock-zone {
+    position: relative;
+    transition: all .25s ease;
+    cursor: pointer;
+  }
+  .mock-zone::after {
+    content: "";
+    position: absolute; inset: 0;
+    border: 2px solid transparent;
+    border-radius: inherit;
+    pointer-events: none;
+    transition: all .25s ease;
+  }
+  .mock-zone.active::after,
+  .mock-zone:hover::after {
+    border-color: var(--zone-c, #0E0E10);
+    box-shadow: 0 0 0 4px rgba(14,14,16,0.05);
+  }
+  .mock-zone.active {
+    background: var(--zone-bg, white);
+  }
+
+  /* Hero ticker */
+  .ticker {
+    overflow: hidden;
+    border-top: 1px solid rgba(14,14,16,0.1);
+    border-bottom: 1px solid rgba(14,14,16,0.1);
+    background: #F3EFE3;
+  }
+
+  /* Prompt code box */
+  .prompt-box {
+    background: #16161A;
+    color: #EDEDED;
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    position: relative;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .prompt-box .accent { color: #FBBF24; }
+  .prompt-box .kw { color: #93C5FD; }
+  .prompt-box .num { color: #86EFAC; }
+
+  /* Don't card hover state */
+  .dont-card { transition: all .3s ease; cursor: pointer; }
+  .dont-card:hover { transform: translateY(-3px); }
+  .do-card { transition: all .3s ease; }
+
+  /* Checklist tick */
+  .tickbox {
+    width: 22px; height: 22px;
+    border: 1.5px solid rgba(14,14,16,0.3);
+    border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all .2s ease;
+    flex-shrink: 0;
+    background: white;
+  }
+  .tickbox.on {
+    background: #16A34A;
+    border-color: #16A34A;
+    color: white;
+  }
+  .tickbox svg { width: 14px; height: 14px; opacity: 0; transition: opacity .15s ease; }
+  .tickbox.on svg { opacity: 1; }
+
+  /* Tabs */
+  .tab-row {
+    display: flex; gap: 6px;
+    background: rgba(14,14,16,0.05);
+    padding: 5px;
+    border-radius: 12px;
+  }
+  .tab-row button {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 9px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--dim);
+    transition: all .2s ease;
+    text-align: center;
+  }
+  .tab-row button.active {
+    background: white;
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(14,14,16,0.06), 0 4px 14px -6px rgba(14,14,16,0.18);
+  }
+
+  /* Subtle link underline */
+  .ulink {
+    background-image: linear-gradient(to right, currentColor, currentColor);
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size .3s;
+  }
+  .ulink:hover { background-size: 0% 1px; }
+
+  /* Section divider rule */
+  .rule {
+    height: 1px; background: rgba(14,14,16,0.12);
+  }
+
+  /* Subtle scroll progress */
+  #scroll-progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--ink);
+    z-index: 60;
+    transition: width .12s linear;
+    width: 0;
+  }
+
+  /* Section number stamp */
+  .stamp {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+  .stamp::before {
+    content: ""; display: block; width: 24px; height: 1px; background: var(--ink);
+  }
+
+  /* Marker arrow */
+  .arrow-svg { width: 18px; height: 12px; flex-shrink: 0; }
+
+  /* When language is Chinese, prefer Chinese font for headings */
+  body.lang-zh .display { font-family: 'Noto Sans SC', 'Bricolage Grotesque', sans-serif; font-weight: 700; letter-spacing: -0.025em; }
+  body.lang-zh { font-family: 'Noto Sans SC', 'Geist', sans-serif; }
+
+  @media (max-width: 768px) {
+    .display-hero { font-size: clamp(2.6rem, 11vw, 4.5rem) !important; }
+  }
+
+  /* Custom scrollbar inside scrollable elements */
+  .nice-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+  .nice-scroll::-webkit-scrollbar-thumb { background: rgba(14,14,16,0.2); border-radius: 999px; }
+
+  /* Brand mark */
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: var(--ink);
+    border-radius: 8px;
+    position: relative;
+  }
+  .brand-mark::after {
+    content: ""; position: absolute;
+    inset: 7px; border-radius: 3px;
+    background: linear-gradient(135deg, #16A34A, #2563EB);
+  }
+
+  /* Cursor-style blinking caret */
+  @keyframes caret { 0%,49% { opacity: 1 } 50%,100% { opacity: 0 } }
+  .caret { animation: caret 0.9s steps(1) infinite; }
+
+  /* No tap highlights */
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* Avatar shape */
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 600; color: white; font-size: 0.75rem; letter-spacing: 0.04em;
+    border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+</style>
+</head>
+<body class="grain lang-zh">
+  <div id="scroll-progress"></div>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react" data-type="module">
+  // Bilingual content dictionary
+// EN = English, ZH = Simplified Chinese
+const DICT = {
+  meta: {
+    title: { zh: "黑客松手册", en: "Hackathon Playbook" },
+    subtitle: { zh: "用最短的路径，做出一个能上 YouTube 的视频应用", en: "The shortest path to a YouTube-ready video app" },
+  },
+
+  // ----- NAV -----
+  nav: {
+    sections: [
+      { id: "demo",     zh: "演示流程",     en: "Demo Flow" },
+      { id: "arch",     zh: "应用架构",     en: "Architecture" },
+      { id: "team",     zh: "6 人团队",     en: "The Team" },
+      { id: "flow",     zh: "黄金工作流",   en: "Workflow" },
+      { id: "dod",      zh: "完成定义",     en: "Definition of Done" },
+      { id: "style",    zh: "工作准则",     en: "Working Style" },
+      { id: "prompts",  zh: "提示词",       en: "Prompts" },
+    ],
+    cta: { zh: "开始", en: "Start" },
+    langZh: "中文", langEn: "EN",
+  },
+
+  // ----- HERO -----
+  hero: {
+    kicker: { zh: "黑客松 · 内部手册", en: "Hackathon · Internal Playbook" },
+    title_a: { zh: "六个人，", en: "Six people, " },
+    title_b: { zh: "一个", en: "one " },
+    title_em: { zh: "可演示", en: "demo-ready" },
+    title_c: { zh: "的视频应用。", en: " video app." },
+    lede: {
+      zh: "这是我们这次黑客松的速读手册：架构、工作流、分工、质量底线、写提示词的方式——一页讲完。不是用来 PPT 给老板看的，是用来照着做的。",
+      en: "This is the fast-read playbook for our hackathon: architecture, workflow, ownership, quality floor, how we prompt — all on one page. Not for slides. For doing.",
+    },
+    primary: { zh: "看演示流程", en: "See the demo flow" },
+    secondary: { zh: "跳到提示词", en: "Jump to prompts" },
+    stats: [
+      { k: { zh: "6 人", en: "6" }, v: { zh: "模块所有者", en: "module owners" } },
+      { k: { zh: "8 步", en: "8" }, v: { zh: "原片到 YouTube", en: "raw → YouTube" } },
+      { k: { zh: "5 条", en: "5" }, v: { zh: "完成标准", en: "done criteria" } },
+      { k: { zh: "1 个", en: "1" }, v: { zh: "完整 Demo", en: "shippable demo" } },
+    ],
+    tickerItems: {
+      zh: ["统一标准", "及时同步", "完成定义 (DoD)", "可演示 · 可用 · 可集成", "标准格式：SRT / JSON / FCPXML", "一次只做一件事", "质量高 → 推进快"],
+      en: ["One standard", "Sync in time", "Definition of Done", "Demo-ready · Usable · Integrable", "Standard formats: SRT / JSON / FCPXML", "One thing at a time", "High quality → fast progress"],
+    }
+  },
+
+  // ----- DEMO FLOW (Image 7) -----
+  demo: {
+    eyebrow: { zh: "第 01 章 · 演示流程", en: "Chapter 01 · Demo Flow" },
+    title: { zh: "从一段原始采访，到一条上线的 YouTube 视频。", en: "From a raw interview to a video live on YouTube." },
+    lede: { zh: "我们最终要演示的，就是下面这 8 步。点开任意一步看它在做什么。", en: "What we're demoing — these 8 steps. Tap any step to see what it does." },
+    steps: [
+      { num: "01", color: "c1", title: { zh: "导入素材", en: "Import assets" }, blurb: { zh: "把原始视频和补充素材拖进项目里。", en: "Drop the raw video and supporting assets into the project." }, detail: { zh: "支持 mp4 / mov，多文件批量导入。素材以缩略图列出，第一帧自动抽取作为封面。", en: "Supports mp4 / mov, batch import. Assets appear as thumbnails with first-frame auto-cover." } },
+      { num: "02", color: "c2", title: { zh: "生成字幕", en: "Generate subtitles" }, blurb: { zh: "AI 把对话转成 .srt 字幕文件。", en: "AI turns speech into a .srt subtitle file." }, detail: { zh: "Whisper 提供初稿，每条字幕带时间码。准确率不重要——下一步会校准。", en: "Whisper drafts it, each cue carries a timecode. Accuracy isn't critical — next step calibrates." } },
+      { num: "03", color: "c3", title: { zh: "对齐字幕", en: "Align subtitles" }, blurb: { zh: "把字幕时间和音频精确对齐。", en: "Snap subtitle timing to the audio precisely." }, detail: { zh: "Qwen 强制对齐解决初稿时间漂移。中文以二元词为锚点，避免词起始偏晚。", en: "Qwen forced-alignment fixes drift. Chinese uses bigram boundaries to counter late-onset bias." } },
+      { num: "04", color: "c4", title: { zh: "翻译字幕", en: "Translate subtitles" }, blurb: { zh: "本地翻译，无 API key。", en: "Translate locally, no API key." }, detail: { zh: "用 argostranslate 离线翻译，保留原 .srt 时间码，输出双语字幕文件。", en: "argostranslate offline. Keeps original .srt timecodes, outputs a bilingual subtitle file." } },
+      { num: "05", color: "c5", title: { zh: "故事组装", en: "Story assembly" }, blurb: { zh: "把字幕重排成故事卡片。", en: "Rearrange cues into story cards." }, detail: { zh: "在 Google Doc 或卡片视图里拖拽，决定每个段落讲什么。结构以 JSON 保存。", en: "Drag in Google Doc or the card view to decide what each beat says. Saved as structured JSON." } },
+      { num: "06", color: "c3", title: { zh: "时间线编辑", en: "Timeline editing" }, blurb: { zh: "多轨视频 / 字幕 / 音频。", en: "Multi-track video / subtitle / audio." }, detail: { zh: "支持剪刀、吸附、HH:MM:SS:FF 时间码、波形渲染、字幕轨道对齐。", en: "Cut tool, snap, HH:MM:SS:FF timecode, waveform rendering, subtitle-track alignment." } },
+      { num: "07", color: "c4", title: { zh: "导出视频 + 字幕", en: "Export video + subs" }, blurb: { zh: "成片配嵌入字幕，或外挂 .srt。", en: "Final cut with burned-in or sidecar .srt." }, detail: { zh: "横版 16:9 或竖版 9:16，可选烧录字幕，同时输出 .mp4 + .srt + 元数据 .json。", en: "16:9 or 9:16, optional burn-in subs, outputs .mp4 + .srt + metadata .json together." } },
+      { num: "08", color: "c2", title: { zh: "上传到 YouTube", en: "Upload to YouTube" }, blurb: { zh: "标题、描述、字幕一键发布。", en: "Title, description, subtitle — one click." }, detail: { zh: "走 YouTube Data API，附带 SRT 作为字幕轨。失败可重试，不会丢成片。", en: "Via YouTube Data API, attaches SRT as a caption track. Retryable, never loses the cut." } },
+    ],
+    closing: { zh: "整个流程的目标：几分钟，不是几天。", en: "The whole flow's goal: minutes, not days." },
+  },
+
+  // ----- APP ARCHITECTURE (Image 5) -----
+  arch: {
+    eyebrow: { zh: "第 02 章 · 应用架构", en: "Chapter 02 · App Architecture" },
+    title: { zh: "把应用拆成 6 个区域，每个区域职责清晰。", en: "Slice the app into 6 zones, each with a clear job." },
+    lede: { zh: "点击下面任一区域，查看它的职责和数据。", en: "Click any zone below to see what it owns and what it carries." },
+    zones: [
+      { id: 1, key: "topnav", color: "#7C3AED", title: { zh: "顶部导航 / 工具栏", en: "Top nav / Toolbar" }, role: { zh: "全局操作入口", en: "Global actions entry" }, items: { zh: ["导入", "转录", "对齐", "翻译", "导出"], en: ["Import", "Transcribe", "Align", "Translate", "Export"] } },
+      { id: 2, key: "preview", color: "#2563EB", title: { zh: "视频预览区", en: "Video Preview" }, role: { zh: "播放视频，查看画面", en: "Play the video, see the frame" }, items: { zh: ["播放控制", "全屏", "时间戳"], en: ["Playback", "Fullscreen", "Timecode"] } },
+      { id: 3, key: "subs", color: "#0EA5E9", title: { zh: "字幕 / 转录区", en: "Subtitle / Transcript" }, role: { zh: "显示和编辑字幕、转录文本", en: "Show and edit subtitles and transcript" }, items: { zh: ["搜索", "可编辑", "当前播放高亮"], en: ["Search", "Editable", "Now-playing highlight"] } },
+      { id: 4, key: "story", color: "#16A34A", title: { zh: "故事组装区", en: "Story Assembly" }, role: { zh: "管理片段 / 卡片，组织内容结构", en: "Manage clips/cards, organize structure" }, items: { zh: ["开场", "问题阐述", "解决方案", "呼吁行动"], en: ["Cold open", "Problem", "Solution", "Call to action"] } },
+      { id: 5, key: "export", color: "#F59E0B", title: { zh: "导出区", en: "Export" }, role: { zh: "选择格式与字幕选项", en: "Choose format and subtitle options" }, items: { zh: ["16:9 横版", "9:16 竖版", "烧录字幕", "导出 SRT"], en: ["16:9 landscape", "9:16 portrait", "Burn-in subs", "Export SRT"] } },
+      { id: 6, key: "timeline", color: "#E11D48", title: { zh: "时间线编辑区", en: "Timeline Editor" }, role: { zh: "剪辑视频、字幕、音频", en: "Cut and edit video, subtitle, audio" }, items: { zh: ["视频轨道", "字幕轨道", "音频轨道", "刀切 / 吸附"], en: ["Video track", "Subtitle track", "Audio track", "Cut / Snap"] } },
+    ],
+    promptTitle: { zh: "提示词原则", en: "Prompt principles" },
+    promptIntro: { zh: "让 AI 按架构稳定输出，每次都先给上下文，再给具体需求。", en: "To get AI to output on-architecture, lead with context, then specifics." },
+    promptPrinciples: [
+      { zh: "先给上下文：你在做什么应用、当前在哪个模块。", en: "Lead with context: what app, which module." },
+      { zh: "再给具体需求：功能 / 输入 / 输出 / 交互。", en: "Then specifics: function / input / output / interaction." },
+      { zh: "指定技术栈：如 React + Tailwind。", en: "Specify the stack: e.g. React + Tailwind." },
+      { zh: "要求保持一致：结构、样式、命名。", en: "Demand consistency: structure, style, naming." },
+      { zh: "一次只做一件事，便于迭代调试。", en: "One thing at a time — easier to iterate." },
+    ],
+  },
+
+  // ----- TEAM (Image 6) -----
+  team: {
+    eyebrow: { zh: "第 03 章 · 分工", en: "Chapter 03 · Ownership" },
+    title: { zh: "六个人，每人一个核心模块。", en: "Six people, one core module each." },
+    lede: { zh: "点头像，看 TA 的地盘。", en: "Click an avatar to light up their turf." },
+    members: [
+      { id: "ui-a",  color: "#7C3AED", initials: "U·A", role: { zh: "UI 设计师 A", en: "UI Designer A" }, owns: ["topnav", "preview"], duties: { zh: ["整体布局", "导航结构", "视频预览区"], en: ["Overall layout", "Nav structure", "Video preview"] } },
+      { id: "fn-a",  color: "#0EA5E9", initials: "F·A", role: { zh: "功能工程师 A", en: "Functional Engineer A" }, owns: ["subs"], duties: { zh: ["转录", "对齐", "翻译"], en: ["Transcription", "Alignment", "Translation"] } },
+      { id: "ui-b",  color: "#16A34A", initials: "U·B", role: { zh: "UI 设计师 B", en: "UI Designer B" }, owns: ["story"], duties: { zh: ["故事组装界面", "卡片设计", "素材管理"], en: ["Story-assembly UI", "Card design", "Asset management"] } },
+      { id: "fn-b",  color: "#E11D48", initials: "F·B", role: { zh: "功能工程师 B", en: "Functional Engineer B" }, owns: ["timeline"], duties: { zh: ["时间线编辑", "剪辑处理", "字幕 / 音频"], en: ["Timeline editor", "Cut & edit", "Subtitle / audio"] } },
+      { id: "be",    color: "#F59E0B", initials: "B·E", role: { zh: "后端工程师", en: "Backend Engineer" }, owns: ["export"], duties: { zh: ["接口 / 数据", "存储管理", "第三方服务", "发布集成"], en: ["Interfaces / data", "Storage", "Third-party services", "Publish integration"] } },
+      { id: "qc",    color: "#0E0E10", initials: "Q·C", role: { zh: "质量检查", en: "Quality Check" }, owns: ["topnav","preview","subs","story","export","timeline"], duties: { zh: ["测试全流程", "问题跟踪", "体验优化"], en: ["End-to-end testing", "Issue tracking", "UX polish"] } },
+    ],
+    footnote: { zh: "分工协作，模块互联，共同完成完整流程。", en: "Split the work, wire the modules, finish the whole flow together." },
+  },
+
+  // ----- GOLDEN WORKFLOW (Image 3) -----
+  flow: {
+    eyebrow: { zh: "第 04 章 · 黄金工作流", en: "Chapter 04 · The Golden Workflow" },
+    title: { zh: "数据沿着标准格式，从一头流到另一头。", en: "Data flows from end to end along standard formats." },
+    lede: { zh: "点节点看输入输出。点 \"放数据包\" 看一帧数据怎么走完六站。", en: "Tap a node for its I/O. Tap \"Send a packet\" to watch a single payload traverse all six stops." },
+    nodes: [
+      { id: 1, color: "#2563EB", title: { zh: "视频", en: "Video" }, fmt: ".MP4", io: { in: { zh: "原始视频", en: "Raw video" }, out: { zh: "视频文件 (.mp4)", en: "Video file (.mp4)" } } },
+      { id: 2, color: "#16A34A", title: { zh: "字幕", en: "Subtitles" }, fmt: ".SRT", io: { in: { zh: ".mp4", en: ".mp4" }, out: { zh: "字幕文件 (.srt)", en: "Subtitle file (.srt)" } } },
+      { id: 3, color: "#7C3AED", title: { zh: "翻译", en: "Translation" }, fmt: ".SRT", io: { in: { zh: "字幕 .srt", en: "Subtitle .srt" }, out: { zh: "翻译字幕 (.srt)", en: "Translated subtitle (.srt)" } } },
+      { id: 4, color: "#EA580C", title: { zh: "故事结构", en: "Story structure" }, fmt: "JSON · Google Doc", io: { in: { zh: "翻译字幕 .srt", en: "Translated .srt" }, out: { zh: "故事结构 (JSON · Doc)", en: "Story structure (JSON · Doc)" } } },
+      { id: 5, color: "#0D9488", title: { zh: "时间线", en: "Timeline" }, fmt: "JSON · FCPXML", io: { in: { zh: "故事结构", en: "Story structure" }, out: { zh: "时间线 (JSON · FCPXML)", en: "Timeline (JSON · FCPXML)" } } },
+      { id: 6, color: "#2563EB", title: { zh: "成品", en: "Final cut" }, fmt: ".MP4 + .SRT", io: { in: { zh: "时间线文件", en: "Timeline file" }, out: { zh: ".mp4 + .srt + .json", en: ".mp4 + .srt + .json" } } },
+    ],
+    principles: [
+      { icon: "🧭", title: { zh: "核心原则", en: "Core principle" }, body: { zh: "模块间通过标准格式传递数据，确保一致性与可集成性。", en: "Modules exchange data through standard formats — that's what guarantees consistency and integrability." } },
+      { icon: "→", title: { zh: "逐步处理", en: "Step by step" }, body: { zh: "每一步只做一件事，输入明确，输出明确。", en: "Each step does one thing — clear input, clear output." } },
+      { icon: "🧩", title: { zh: "标准格式", en: "Standard formats" }, body: { zh: "SRT / JSON / FCPXML 等通用格式，保证模块可兼容。", en: "Common formats — SRT, JSON, FCPXML — keep modules compatible." } },
+      { icon: "✓", title: { zh: "可追溯", en: "Traceable" }, body: { zh: "每个阶段的输出都可保存与回溯，便于修改和优化。", en: "Every stage's output can be saved and revisited for editing and tuning." } },
+      { icon: "🚀", title: { zh: "最终一致", en: "Aligned outcome" }, body: { zh: "所有模块协同，生成可发布的成品文件。", en: "All modules work together to produce a release-ready file." } },
+    ],
+    playLabel: { zh: "放一个数据包", en: "Send a packet" },
+    stopLabel: { zh: "停止", en: "Stop" },
+  },
+
+  // ----- DEFINITION OF DONE (Image 2) -----
+  dod: {
+    eyebrow: { zh: "第 05 章 · 完成定义 (DoD)", en: "Chapter 05 · Definition of Done" },
+    title: { zh: "一个模块在交付前，必须满足以下所有标准。", en: "Before a module ships, it must clear all five." },
+    lede: { zh: "勾完五项才算完。少一项 = 没完。", en: "Tick all five. Miss any one = not done." },
+    criteria: [
+      { id: "fn", color: "#2563EB", icon: "🖥", title: { zh: "功能可用", en: "Function works" }, bullets: { zh: ["核心功能按预期工作", "用户可以完成主要任务", "无明显报错或崩溃"], en: ["Core features work as expected", "Users can complete the primary task", "No obvious errors or crashes"] }, ex: { zh: "上传视频后，成功生成字幕，并在界面中正确显示。", en: "After uploading a video, subtitles generate and display correctly in the UI." } },
+      { id: "int", color: "#16A34A", icon: "🧩", title: { zh: "集成可用", en: "Integration works" }, bullets: { zh: ["能与前后模块正确连接", "数据格式和接口符合约定", "输入输出可正常传递"], en: ["Connects cleanly with upstream and downstream modules", "Data formats and interfaces match the contract", "I/O passes through correctly"] }, ex: { zh: "导出的故事结构 JSON，可以顺利出现在时间轴上进行编辑。", en: "Exported story-structure JSON flows into the timeline for editing." } },
+      { id: "ui", color: "#7C3AED", icon: "🎨", title: { zh: "UI 一致", en: "UI is consistent" }, bullets: { zh: ["遵循统一的设计系统", "组件、颜色、间距一致", "在不同设备上显示正常"], en: ["Follows the shared design system", "Components, colors, spacing match", "Renders correctly across devices"] }, ex: { zh: "使用统一的按钮、字体、颜色和间距，符合设计规范。", en: "Uses the unified buttons, fonts, colors, and spacing." } },
+      { id: "safe", color: "#EA580C", icon: "🛡", title: { zh: "不影响他人", en: "Doesn't break others" }, bullets: { zh: ["不会破坏其他模块的功能", "通过基本回归测试", "不引入新的错误或警告"], en: ["Doesn't break other modules", "Passes basic regression checks", "No new errors or warnings"] }, ex: { zh: "集成后，其他模块的流程仍然正常工作。", en: "After integration, every other module's flow still works." } },
+      { id: "demo", color: "#0D9488", icon: "▶", title: { zh: "支持最终演示", en: "Demo-ready" }, bullets: { zh: ["包含演示所需的内容和数据", "能在完整流程中顺利呈现", "输出文件可用于最终 Demo"], en: ["Has the content and data the demo needs", "Runs smoothly inside the full flow", "Output files are usable in the final demo"] }, ex: { zh: "该模块的输出能在最终 Demo 中被展示和使用。", en: "This module's output is showcased and used in the final demo." } },
+    ],
+    exLabel: { zh: "示例", en: "Example" },
+    checklistTitle: { zh: "交付前自检清单", en: "Pre-delivery self-check" },
+    checklist: {
+      zh: ["功能已实现并可正常使用", "与前后模块联调通过", "输入 / 输出符合接口规范", "无明显 Bug 或控制台错误", "界面符合设计规范", "已更新文档 (如有)"],
+      en: ["Feature implemented and usable", "Integration with neighboring modules passes", "I/O matches the interface spec", "No obvious bugs or console errors", "UI follows the design spec", "Docs updated (if any)"],
+    },
+    warnTitle: { zh: "未满足以上任一项 = 未完成", en: "Miss any of the above = not done" },
+    warnBody: { zh: "请不要提前交付。保证质量，避免反复返工。", en: "Don't ship early. Protect quality. Avoid rework." },
+    pathBad: { zh: "问题多 → 反复改", en: "Many issues → endless rework" },
+    pathGood: { zh: "质量高 → 推进快", en: "High quality → fast progress" },
+    cheer: { zh: "全部勾上了。这一项算 DoD。", en: "All checked. This one counts as Done." },
+  },
+
+  // ----- WORKING STYLE (Image 1) -----
+  style: {
+    eyebrow: { zh: "第 06 章 · 工作准则", en: "Chapter 06 · Working Style" },
+    title_a: { zh: "我们不要这样做。", en: "What we don't do." },
+    title_b: { zh: "我们要这样做。", en: "What we do." },
+    lede_a: { zh: "这些行为会导致重复工作、集成困难、延期甚至失败。", en: "These behaviors create duplicated work, integration friction, delays — sometimes failure." },
+    lede_b: { zh: "统一方向，高效协作，快速交付可展示的完整成果。", en: "Aligned direction, efficient collaboration, fast delivery of a complete demo-ready result." },
+    donts: [
+      { num: "01", title: { zh: "各自为政", en: "Going it alone" }, quotes: { zh: ["我用我的方式", "我有自己的想法", "界面我再改一下"], en: ["I'll do it my way", "I have my own ideas", "Let me tweak the UI again"] }, cost: { zh: "缺乏统一方向和标准", en: "No shared direction or standard" } },
+      { num: "02", title: { zh: "重复造轮子", en: "Reinventing the wheel" }, quotes: { zh: ["我来做字幕上传", "我也在做字幕上传"], en: ["I'll build subtitle upload", "I'm also building subtitle upload"] }, cost: { zh: "浪费时间与精力", en: "Wasted time and effort" } },
+      { num: "03", title: { zh: "接口不统一", en: "Inconsistent interfaces" }, quotes: { zh: ["我的输出是 TXT", "我的输入要 JSON", "我用的是 CSV"], en: ["My output is TXT", "My input needs JSON", "I use CSV"] }, cost: { zh: "集成困难，反复返工", en: "Hard to integrate, repeated rework" } },
+      { num: "04", title: { zh: "UI 风格混乱", en: "UI style chaos" }, quotes: { zh: ["Button", "BUTTON", "按钮", "上传文件", "Upload File"], en: ["Button", "BUTTON", "按钮", "上传文件", "Upload File"] }, cost: { zh: "体验割裂，不专业", en: "Fragmented experience, unprofessional" } },
+      { num: "05", title: { zh: "不沟通 / 不同步", en: "No comms / out of sync" }, quotes: { zh: ["我改了流程", "我不知道…", "我这里有问题", "我也没看到"], en: ["I changed the flow", "I had no idea…", "I have an issue", "I didn't see it either"] }, cost: { zh: "信息断层，问题积压", en: "Information silos, blocked issues" } },
+      { num: "06", title: { zh: "追求完美细节", en: "Chasing perfect details" }, quotes: { zh: ["按钮动画再调一下", "颜色再优化一下", "图标再换一个", "布局再微调一下"], en: ["Tweak the button animation", "Refine the color", "Swap this icon again", "Adjust the layout once more"] }, cost: { zh: "过度设计，影响进度", en: "Over-designed, blocks progress" } },
+    ],
+    dos: [
+      { num: "01", title: { zh: "按职责推进", en: "Work to your role" }, body: { zh: "专注自己的模块，按标准推进。", en: "Focus on your module. Follow the standard." } },
+      { num: "02", title: { zh: "完成后自检", en: "Self-check on completion" }, body: { zh: "确认功能、格式、界面符合要求。", en: "Confirm function, format, UI meet the spec." } },
+      { num: "03", title: { zh: "QC 过来检查", en: "QC reviews" }, body: { zh: "有问题，QC 当场查看并指出。", en: "Issues get flagged on the spot by QC." } },
+      { num: "04", title: { zh: "问题当场解决", en: "Fix on the spot" }, body: { zh: "及时修改，不留到下一阶段。", en: "Fix in the moment. Don't kick it down the road." } },
+      { num: "05", title: { zh: "UI ↔ 功能 交叉检查", en: "UI ↔ Function cross-check" }, body: { zh: "相互确认界面与功能：一致、可用、美观。", en: "Confirm UI and function — aligned, usable, polished." } },
+      { num: "06", title: { zh: "进入下一步", en: "Move to the next step" }, body: { zh: "通过检查，交付，进入下一模块。", en: "Pass review, deliver, move on." } },
+    ],
+    core: { title: { zh: "核心原则", en: "Core principles" }, items: { zh: ["统一标准、统一格式、统一风格", "及时沟通、及时同步、及时解决", "完成定义 (DoD) 是交付的底线"], en: ["One standard, one format, one style", "Communicate, sync, resolve — in time", "Definition of Done is the delivery floor"] } },
+    remember: { title: { zh: "记住", en: "Remember" }, body: { zh: "完美不是目标——可演示、可用、可集成才是。", en: "Perfection isn't the goal — demo-ready, usable, integrable is." } },
+    goal: { title: { zh: "我们的目标", en: "Our goal" }, body: { zh: "高效协作，快速迭代，交付稳定、可演示的完整成果。", en: "Collaborate efficiently. Iterate fast. Deliver a stable, demo-ready whole." } },
+  },
+
+  // ----- PROMPTS (Image 4) -----
+  prompts: {
+    eyebrow: { zh: "第 07 章 · 提示词", en: "Chapter 07 · Prompts" },
+    title: { zh: "三种常见场景，三套提示词模板。", en: "Three common scenarios, three prompt templates." },
+    lede: { zh: "切换标签看每种场景的流程图和示例。", en: "Switch tabs to see the flow and sample prompt for each scenario." },
+    tabs: [
+      {
+        key: "consistency",
+        color: "#2563EB",
+        label: { zh: "确保一致性", en: "Maintain consistency" },
+        intent: { zh: "在已有规则和风格基础上，保持一致地扩展或优化。", en: "Extend or refine on top of existing rules and style — consistently." },
+        flow: [
+          { zh: "已有规范", en: "Existing spec" },
+          { zh: "新需求", en: "New requirement" },
+          { zh: "保持一致的输出", en: "Consistent output" },
+        ],
+        sample: {
+          zh: [
+            "请基于我们已有的应用架构和设计规范，",
+            "为 \"字幕 / 转录区\" 增加 \"导出字幕（SRT）\" 功能。",
+            "",
+            "要求：",
+            "1. 保持与现有界面风格一致",
+            "2. 使用现有的组件和交互模式",
+            "3. 复用现有的导出逻辑（如有）",
+            "4. 输出：界面说明 + 关键数据结构 + 交互流程",
+          ],
+          en: [
+            "Based on our existing app architecture and design spec,",
+            "add an \"Export Subtitle (SRT)\" feature to the \"Subtitle / Transcript\" pane.",
+            "",
+            "Requirements:",
+            "1. Match the existing UI style",
+            "2. Use existing components and interaction patterns",
+            "3. Reuse the existing export logic (if any)",
+            "4. Output: UI description + key data structures + interaction flow",
+          ]
+        },
+        goal: { zh: "在一致的框架下，持续迭代。", en: "Iterate continuously inside a consistent frame." }
+      },
+      {
+        key: "fix",
+        color: "#EA580C",
+        label: { zh: "修复问题", en: "Fix an issue" },
+        intent: { zh: "针对具体问题，定位原因并给出解决方案。", en: "Diagnose a specific bug and propose a fix." },
+        flow: [
+          { zh: "发现问题", en: "Spot the issue" },
+          { zh: "分析原因", en: "Analyze cause" },
+          { zh: "修复方案", en: "Propose fix" },
+        ],
+        sample: {
+          zh: [
+            "在 \"时间线编辑区\" 中，拖动片段后，",
+            "字幕时间没有同步更新。",
+            "",
+            "请帮我：",
+            "1. 分析可能的原因（前端 / 状态管理 / 数据同步）",
+            "2. 给出修复方案（代码或逻辑层面的修改建议）",
+            "3. 说明如何验证修复是否生效",
+            "4. 需要考虑的边界情况",
+          ],
+          en: [
+            "In the Timeline Editor, after dragging a clip,",
+            "the subtitle timing isn't syncing.",
+            "",
+            "Please:",
+            "1. Analyze possible causes (frontend / state management / data sync)",
+            "2. Propose a fix (code or logic-level changes)",
+            "3. Explain how to verify the fix works",
+            "4. Call out edge cases to consider",
+          ]
+        },
+        goal: { zh: "快速定位并解决问题，恢复稳定。", en: "Locate the bug, fix it, get back to stable." }
+      },
+      {
+        key: "connect",
+        color: "#16A34A",
+        label: { zh: "连接模块", en: "Connect modules" },
+        intent: { zh: "将不同模块打通，定义交互和数据流。", en: "Wire modules together — define interactions and data flow." },
+        flow: [
+          { zh: "视频预览区", en: "Video preview" },
+          { zh: "字幕 / 转录区", en: "Subtitle / transcript" },
+          { zh: "故事组装区", en: "Story assembly" },
+          { zh: "导出区", en: "Export" },
+        ],
+        sample: {
+          zh: [
+            "请设计并实现模块之间的连接：",
+            "当 \"字幕 / 转录区\" 的内容更新后，",
+            "自动同步到 \"故事组装区\" 的对应片段。",
+            "",
+            "要求：",
+            "1. 定义数据流向和触发时机",
+            "2. 说明数据结构和字段映射关系",
+            "3. 处理冲突和边界情况",
+            "4. 输出接口定义 / 事件机制 / 状态管理方案",
+          ],
+          en: [
+            "Design and implement the connection between modules:",
+            "When the \"Subtitle / Transcript\" content updates,",
+            "auto-sync to the matching clip in \"Story Assembly\".",
+            "",
+            "Requirements:",
+            "1. Define data flow and trigger timing",
+            "2. Spell out data structures and field mappings",
+            "3. Handle conflicts and edge cases",
+            "4. Output: interface definition / event mechanism / state management plan",
+          ]
+        },
+        goal: { zh: "让模块协同工作，形成完整流程。", en: "Get modules cooperating into one complete flow." }
+      }
+    ],
+    copy: { zh: "复制", en: "Copy" },
+    copied: { zh: "已复制", en: "Copied" },
+    goalLabel: { zh: "目标", en: "Goal" },
+    principlesTitle: { zh: "通用写作原则", en: "Universal prompt-writing principles" },
+    principles: [
+      { title: { zh: "明确目标", en: "Be explicit" }, body: { zh: "说明你要 AI 做什么。", en: "Spell out what you want AI to do." } },
+      { title: { zh: "提供上下文", en: "Provide context" }, body: { zh: "给出相关背景和约束。", en: "Background and constraints." } },
+      { title: { zh: "具体可执行", en: "Concrete" }, body: { zh: "越具体，输出越准确。", en: "The more specific, the more accurate." } },
+      { title: { zh: "定义输出格式", en: "Define output" }, body: { zh: "说明要什么格式的结果。", en: "Say what shape you want." } },
+    ]
+  },
+
+  // ----- CLOSE -----
+  close: {
+    eyebrow: { zh: "结尾", en: "End note" },
+    title: { zh: "我们不在做艺术品。我们在做一个能跑通的演示。", en: "We're not making art. We're making a demo that runs." },
+    body: { zh: "把架构画清楚，把接口约定好，按时检查，到点交付。其他都是噪音。", en: "Get the architecture clear, agree on the interface, check on time, ship on time. Everything else is noise." },
+    sign: { zh: "黑客松 · 内部手册", en: "Hackathon · Internal Playbook" },
+    back: { zh: "回到顶部", en: "Back to top" },
+  }
+};
+
+
+// ===== App code =====
+
+const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext, Fragment } = React;
+
+// ===== Language context =====
+const LangCtx = createContext({ lang: "zh", t: (k) => k });
+const useLang = () => useContext(LangCtx);
+
+// helper: pick zh/en from a {zh, en} object
+const pick = (obj, lang) => (obj && obj[lang] !== undefined ? obj[lang] : obj);
+
+// ===== Hooks =====
+function useInView(opts = {}) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ob = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) {
+        setInView(true);
+        ob.disconnect();
+      }
+    }, { threshold: opts.threshold ?? 0.18, rootMargin: opts.rootMargin ?? "0px 0px -10% 0px" });
+    ob.observe(el);
+    return () => ob.disconnect();
+  }, []);
+  return [ref, inView];
+}
+
+function Reveal({ children, className = "", as: As = "div", stagger = false, ...rest }) {
+  const [ref, inView] = useInView();
+  return (
+    <As ref={ref} className={(stagger ? "reveal-stagger " : "reveal ") + (inView ? "in " : "") + className} {...rest}>
+      {children}
+    </As>
+  );
+}
+
+// ===== Scroll progress =====
+function useScrollProgress() {
+  useEffect(() => {
+    const bar = document.getElementById("scroll-progress");
+    const onScroll = () => {
+      const h = document.documentElement;
+      const scrolled = h.scrollTop / (h.scrollHeight - h.clientHeight);
+      if (bar) bar.style.width = (scrolled * 100).toFixed(2) + "%";
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+}
+
+// ===== Tiny icons =====
+const Icon = {
+  Arrow: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M13 6l6 6-6 6"/>
+    </svg>
+  ),
+  Check: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+  ),
+  X: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  ),
+  Copy: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/>
+    </svg>
+  ),
+  Play: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg>
+  ),
+  Pause: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
+  ),
+  Cube: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"><path d="M12 3l9 5-9 5-9-5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>
+  ),
+  Spark: ({ className = "" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.6 4.8L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.2L12 3z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7L19 16z"/></svg>
+  ),
+};
+
+// ===== NAV =====
+function Nav({ lang, setLang }) {
+  const nav = DICT.nav;
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 24);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+
+  return (
+    <header
+      className={"fixed top-0 inset-x-0 z-50 transition-all duration-300 " +
+        (scrolled ? "py-2.5 backdrop-blur-md bg-paper/80 border-b border-ink/8" : "py-4 bg-transparent")}
+      style={{ borderBottom: scrolled ? "1px solid rgba(14,14,16,0.08)" : "1px solid transparent" }}
+    >
+      <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between gap-4">
+        <a href="#top" className="flex items-center gap-3 group">
+          <div className="brand-mark"></div>
+          <div className="flex flex-col leading-tight">
+            <span className="display text-base md:text-[17px] tracking-tight">{pick(DICT.meta.title, lang)}</span>
+            <span className="text-[11px] text-dim hidden md:block mono uppercase tracking-widest">{lang === "zh" ? "Hackathon Playbook" : "黑客松手册"}</span>
+          </div>
+        </a>
+
+        <nav className="hidden lg:flex items-center gap-1">
+          {nav.sections.map((s) => (
+            <a key={s.id} href={"#" + s.id}
+              className="px-3 py-1.5 text-sm text-ink/70 hover:text-ink rounded-full transition">
+              {pick(s, lang)}
+            </a>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <LangSwitch lang={lang} setLang={setLang} />
+          <a href="#demo" className="btn btn-ink hidden md:inline-flex">
+            {pick(nav.cta, lang) || "Start"}<Icon.Arrow className="w-3.5 h-3.5"/>
+          </a>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function LangSwitch({ lang, setLang }) {
+  const isZh = lang === "zh";
+  return (
+    <div className="lang-pill" role="tablist" aria-label="Language">
+      <span className="slider" style={{ transform: isZh ? "translateX(0)" : "translateX(100%)" }} />
+      <button onClick={() => setLang("zh")} className={isZh ? "active" : ""} aria-pressed={isZh}>中文</button>
+      <button onClick={() => setLang("en")} className={!isZh ? "active" : ""} aria-pressed={!isZh}>EN</button>
+    </div>
+  );
+}
+
+// ===== HERO =====
+function Hero({ lang }) {
+  const h = DICT.hero;
+  return (
+    <section id="top" className="relative pt-32 md:pt-40 pb-20 md:pb-28 overflow-hidden">
+      {/* decorative blobs */}
+      <div aria-hidden className="pointer-events-none absolute -top-20 -left-20 w-[420px] h-[420px] rounded-full opacity-40 floaty"
+           style={{ background: "radial-gradient(circle, rgba(124,58,237,0.25), transparent 70%)" }}/>
+      <div aria-hidden className="pointer-events-none absolute top-10 -right-20 w-[480px] h-[480px] rounded-full opacity-40 floaty-slow"
+           style={{ background: "radial-gradient(circle, rgba(22,163,74,0.22), transparent 70%)" }}/>
+      <div aria-hidden className="pointer-events-none absolute inset-0 dotgrid opacity-30" />
+
+      <div className="relative max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="flex items-center gap-3 mb-7">
+            <span className="chip bg-ink text-paper">{pick(h.kicker, lang)}</span>
+            <span className="text-[11px] text-dim mono uppercase tracking-widest">2026 · TEAM EDITION</span>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <h1 className="display display-tight display-hero text-[64px] md:text-[88px] leading-[0.95] max-w-5xl">
+            {pick(h.title_a, lang)}<br className="hidden md:block"/>
+            {pick(h.title_b, lang)}
+            <span className="serif-it" style={{ color: "#16A34A" }}>{pick(h.title_em, lang)}</span>
+            {pick(h.title_c, lang)}
+          </h1>
+        </Reveal>
+
+        <Reveal>
+          <p className="mt-8 max-w-2xl text-lg md:text-xl leading-[1.55] text-ink/72">
+            {pick(h.lede, lang)}
+          </p>
+        </Reveal>
+
+        <Reveal>
+          <div className="mt-9 flex flex-wrap items-center gap-3">
+            <a href="#demo" className="btn btn-ink">{pick(h.primary, lang)}<Icon.Arrow className="w-3.5 h-3.5"/></a>
+            <a href="#prompts" className="btn">{pick(h.secondary, lang)}</a>
+          </div>
+        </Reveal>
+
+        <Reveal stagger className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-px bg-ink/8 border border-ink/8 rounded-2xl overflow-hidden">
+          {h.stats.map((s, i) => (
+            <div key={i} className="bg-paper p-6">
+              <div className="display text-4xl md:text-5xl">{pick(s.k, lang)}</div>
+              <div className="text-xs mt-1 text-dim uppercase tracking-wider mono">{pick(s.v, lang)}</div>
+            </div>
+          ))}
+        </Reveal>
+      </div>
+
+      {/* ticker */}
+      <div className="ticker mt-24">
+        <div className="flex marquee-track py-4 whitespace-nowrap">
+          {[...h.tickerItems[lang], ...h.tickerItems[lang]].map((it, i) => (
+            <div key={i} className="mx-8 flex items-center gap-3">
+              <span className="display text-2xl">{it}</span>
+              <span className="display text-2xl text-ink/30">✦</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ===== DEMO FLOW (Section 1) =====
+function DemoSection({ lang }) {
+  const d = DICT.demo;
+  const [active, setActive] = useState(0);
+  const colorMap = { c1: "#2563EB", c2: "#16A34A", c3: "#7C3AED", c4: "#EA580C", c5: "#0D9488" };
+
+  return (
+    <section id="demo" className="py-24 md:py-32 relative">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(d.eyebrow, lang)}</div>
+          <h2 className="display text-4xl md:text-6xl max-w-4xl leading-[1.05] tracking-tight">{pick(d.title, lang)}</h2>
+          <p className="text-ink/65 mt-6 max-w-2xl text-lg">{pick(d.lede, lang)}</p>
+        </Reveal>
+
+        {/* Step list */}
+        <Reveal stagger className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {d.steps.map((s, i) => {
+            const c = colorMap[s.color];
+            const isActive = active === i;
+            return (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                className={"text-left p-5 rounded-2xl border transition-all duration-300 " +
+                  (isActive
+                    ? "border-ink/30 bg-white shadow-[0_18px_40px_-22px_rgba(14,14,16,0.3)] scale-[1.02]"
+                    : "border-ink/10 bg-white/50 hover:bg-white hover:border-ink/20")}
+                style={isActive ? { boxShadow: `0 0 0 1px ${c}, 0 18px 40px -22px ${c}55` } : {}}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="mono text-xs tracking-widest" style={{ color: c }}>{s.num}</div>
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center"
+                       style={{ background: isActive ? c : "rgba(14,14,16,0.06)", color: isActive ? "white" : "#0E0E10" }}>
+                    {isActive ? <Icon.Play className="w-3 h-3 ml-0.5"/> : <span className="text-xs mono">{i+1}</span>}
+                  </div>
+                </div>
+                <div className="display text-lg md:text-xl leading-tight">{pick(s.title, lang)}</div>
+                <div className="text-sm text-ink/60 mt-2 leading-relaxed">{pick(s.blurb, lang)}</div>
+              </button>
+            );
+          })}
+        </Reveal>
+
+        {/* Detail panel for active step */}
+        <Reveal className="mt-8">
+          <div className="surface p-7 md:p-10">
+            <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-12">
+              <div className="md:w-1/3">
+                <div className="mono text-xs tracking-widest text-dim mb-2">STEP {d.steps[active].num}</div>
+                <div className="display text-3xl md:text-4xl leading-tight">{pick(d.steps[active].title, lang)}</div>
+              </div>
+              <div className="md:w-2/3 md:pl-8 md:border-l border-ink/10">
+                <div className="text-base md:text-lg text-ink/80 leading-relaxed">{pick(d.steps[active].detail, lang)}</div>
+                <div className="mt-6 flex items-center gap-3">
+                  <button onClick={() => setActive((active - 1 + d.steps.length) % d.steps.length)} className="btn">
+                    <span style={{ transform: "rotate(180deg)" }}><Icon.Arrow className="w-3.5 h-3.5"/></span>
+                    {lang === "zh" ? "上一步" : "Prev"}
+                  </button>
+                  <button onClick={() => setActive((active + 1) % d.steps.length)} className="btn btn-ink">
+                    {lang === "zh" ? "下一步" : "Next"}<Icon.Arrow className="w-3.5 h-3.5"/>
+                  </button>
+                  <div className="ml-auto text-sm text-dim mono">{String(active+1).padStart(2,"0")} / {String(d.steps.length).padStart(2,"0")}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <p className="mt-12 display text-xl md:text-2xl text-ink/70 italic">{pick(d.closing, lang)}</p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== APP ARCHITECTURE (Section 2) =====
+function ArchSection({ lang, sharedZone, setSharedZone }) {
+  const a = DICT.arch;
+  const zones = a.zones;
+  const active = sharedZone;
+  const activeZone = zones.find(z => z.key === active) || zones[0];
+
+  return (
+    <section id="arch" className="py-24 md:py-32 bg-cream/40">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(a.eyebrow, lang)}</div>
+          <h2 className="display text-4xl md:text-6xl max-w-4xl leading-[1.05]">{pick(a.title, lang)}</h2>
+          <p className="text-ink/65 mt-6 max-w-2xl text-lg">{pick(a.lede, lang)}</p>
+        </Reveal>
+
+        <Reveal className="mt-14 grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+          {/* Mock app */}
+          <div className="lg:col-span-3">
+            <MockApp lang={lang} activeKey={active} onPick={setSharedZone} />
+          </div>
+
+          {/* Sidebar with details */}
+          <div className="lg:col-span-2">
+            <div className="surface p-7 sticky top-24">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center display font-bold text-white" style={{ background: activeZone.color }}>{activeZone.id}</div>
+                <div>
+                  <div className="display text-xl leading-tight">{pick(activeZone.title, lang)}</div>
+                  <div className="text-xs mono uppercase tracking-widest text-dim">{activeZone.key}</div>
+                </div>
+              </div>
+              <p className="text-ink/75 leading-relaxed">{pick(activeZone.role, lang)}</p>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {pick(activeZone.items, lang).map((it, i) => (
+                  <span key={i} className="chip border border-ink/12 bg-white text-ink/80">{it}</span>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-ink/10">
+                <div className="text-xs mono uppercase tracking-widest text-dim mb-2">{lang === "zh" ? "切换区域" : "Switch zone"}</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {zones.map((z) => (
+                    <button key={z.key} onClick={() => setSharedZone(z.key)}
+                      className={"px-2.5 py-1 text-xs rounded-md border transition " +
+                        (active === z.key ? "text-white border-transparent" : "text-ink/70 border-ink/15 hover:border-ink/30")}
+                      style={active === z.key ? { background: z.color } : {}}>
+                      {z.id}. {pick(z.title, lang)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Prompt principles */}
+        <Reveal className="mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            <div className="md:col-span-4">
+              <div className="display text-3xl leading-tight">{pick(a.promptTitle, lang)}</div>
+              <p className="text-ink/65 mt-3">{pick(a.promptIntro, lang)}</p>
+            </div>
+            <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+              {a.promptPrinciples.map((p, i) => (
+                <div key={i} className="surface-flat p-4 flex items-start gap-3">
+                  <div className="mono text-xs text-dim mt-0.5">{String(i+1).padStart(2,"0")}</div>
+                  <div className="text-sm leading-relaxed text-ink/80">{pick(p, lang)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// Mock app component (used by Arch + Team sections)
+function MockApp({ lang, activeKey, onPick, highlight = [] }) {
+  const z = DICT.arch.zones;
+  const get = (k) => z.find(x => x.key === k);
+  const isOn = (k) => activeKey === k || highlight.includes(k);
+  const colorFor = (k) => get(k).color;
+  const styleFor = (k) => ({ "--zone-c": colorFor(k), "--zone-bg": "rgba(255,255,255,0.95)" });
+
+  const cls = (k) => "mock-zone " + (isOn(k) ? "active" : "");
+
+  return (
+    <div className="mockup">
+      {/* Top nav */}
+      <div className={cls("topnav") + " px-4 py-3 flex items-center gap-1.5 border-b border-ink/8"}
+           style={styleFor("topnav")} onClick={() => onPick && onPick("topnav")}>
+        <div className="flex gap-1.5 mr-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-ink/15"/>
+          <div className="w-2.5 h-2.5 rounded-full bg-ink/15"/>
+          <div className="w-2.5 h-2.5 rounded-full bg-ink/15"/>
+        </div>
+        <div className="text-xs mono text-dim mr-4">video.app</div>
+        {[
+          { zh: "导入", en: "Import" },
+          { zh: "转录", en: "Transcribe" },
+          { zh: "对齐", en: "Align" },
+          { zh: "翻译", en: "Translate" },
+          { zh: "导出", en: "Export" },
+        ].map((it, i) => (
+          <span key={i} className="text-xs px-2 py-1 rounded text-ink/70 hover:bg-ink/5">{pick(it, lang)}</span>
+        ))}
+        <div className="ml-auto flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded bg-ink/8"/>
+          <div className="w-5 h-5 rounded-full bg-ink/8"/>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="p-3 grid grid-cols-12 gap-3">
+        {/* Video preview */}
+        <div className={cls("preview") + " col-span-12 md:col-span-4 rounded-lg p-3 bg-white"}
+             style={styleFor("preview")} onClick={() => onPick && onPick("preview")}>
+          <div className="aspect-video rounded-md relative overflow-hidden"
+               style={{ background: "linear-gradient(135deg, #6b7c93 0%, #2c3e50 50%, #1a252f 100%)" }}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                <Icon.Play className="w-4 h-4 ml-0.5 text-ink"/>
+              </div>
+            </div>
+            <div className="absolute bottom-0 inset-x-0 p-2">
+              <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+                <div className="h-full bg-white/90" style={{ width: "32%" }}/>
+              </div>
+            </div>
+          </div>
+          <div className="mt-2 flex items-center justify-between text-[10px] mono text-ink/50">
+            <span>00:00 / 45:12</span>
+            <span>1080p</span>
+          </div>
+        </div>
+
+        {/* Subtitle */}
+        <div className={cls("subs") + " col-span-12 md:col-span-4 rounded-lg p-3 bg-white"}
+             style={styleFor("subs")} onClick={() => onPick && onPick("subs")}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs font-medium">{lang === "zh" ? "字幕 / 转录" : "Subtitle / Transcript"}</div>
+            <div className="text-xs text-dim mono">…</div>
+          </div>
+          <div className="rounded-md bg-ink/4 px-2 py-1.5 mb-2 text-[11px] text-dim">{lang === "zh" ? "搜索字幕…" : "Search subtitles…"}</div>
+          {[
+            { t: "00:00:05", zh: "我们需要采取行动。", en: "We need to act now." },
+            { t: "00:00:09", zh: "气候变化正在影响生活。", en: "Climate change is changing lives.", active: true },
+            { t: "00:00:14", zh: "这是一个全球性的问题。", en: "It's a global problem." },
+            { t: "00:00:20", zh: "但我们可以一起解决。", en: "But we can solve it together." },
+          ].map((row, i) => (
+            <div key={i} className={"flex gap-2 py-1.5 text-[11px] border-b border-ink/5 last:border-b-0 " + (row.active ? "bg-amber/10 -mx-1 px-1 rounded" : "")}>
+              <span className="mono text-dim w-14 flex-shrink-0">{row.t}</span>
+              <span className="text-ink/80 flex-1 truncate">{pick(row, lang)}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Story */}
+        <div className={cls("story") + " col-span-12 md:col-span-3 rounded-lg p-3 bg-white"}
+             style={styleFor("story")} onClick={() => onPick && onPick("story")}>
+          <div className="text-xs font-medium mb-2">{lang === "zh" ? "故事组装" : "Story Assembly"}</div>
+          {[
+            { c: "#a8d8ff", zh: "开场", en: "Cold open", t: "00:00:00 - 00:00:05" },
+            { c: "#ffd9a8", zh: "问题阐述", en: "Problem", t: "00:00:05 - 00:00:18" },
+            { c: "#bef0c4", zh: "解决方案", en: "Solution", t: "00:00:18 - 00:00:35" },
+            { c: "#fcc8c8", zh: "呼吁行动", en: "Call to action", t: "00:00:35 - 00:00:45" },
+          ].map((card, i) => (
+            <div key={i} className="flex gap-2 items-center p-1.5 rounded-md bg-ink/2 mb-1.5">
+              <div className="w-7 h-7 rounded flex-shrink-0" style={{ background: card.c }}/>
+              <div className="min-w-0">
+                <div className="text-[11px] font-medium truncate">{pick(card, lang)}</div>
+                <div className="text-[9px] text-dim mono truncate">{card.t}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Export */}
+        <div className={cls("export") + " col-span-12 md:col-span-1 rounded-lg p-2 bg-white flex flex-col gap-1.5"}
+             style={styleFor("export")} onClick={() => onPick && onPick("export")}>
+          <div className="text-[10px] font-medium mb-1">{lang === "zh" ? "导出" : "Export"}</div>
+          <div className="text-[9px] text-dim">{lang === "zh" ? "格式" : "Format"}</div>
+          <div className="flex flex-col gap-1">
+            <div className="px-1.5 py-1 rounded text-[9px] border border-ink/15 text-center">16:9</div>
+            <div className="px-1.5 py-1 rounded text-[9px] bg-ink/4 text-center">9:16</div>
+          </div>
+          <div className="text-[9px] text-dim mt-1">{lang === "zh" ? "字幕" : "Subs"}</div>
+          <div className="h-3 w-7 rounded-full bg-c2 relative">
+            <div className="absolute right-0.5 top-0.5 w-2 h-2 rounded-full bg-white"/>
+          </div>
+          <div className="px-1 py-1 mt-1 rounded text-[9px] text-white text-center" style={{ background: "#F59E0B" }}>{lang === "zh" ? "导出" : "Go"}</div>
+        </div>
+
+        {/* Timeline */}
+        <div className={cls("timeline") + " col-span-12 rounded-lg p-3 bg-white"}
+             style={styleFor("timeline")} onClick={() => onPick && onPick("timeline")}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs font-medium">{lang === "zh" ? "时间线编辑" : "Timeline"}</div>
+            <div className="flex gap-3 text-[9px] mono text-dim">
+              <span>00:00</span><span>00:10</span><span>00:20</span><span>00:30</span><span>00:40</span><span>00:50</span>
+            </div>
+          </div>
+          {[
+            { label: "V", colors: ["#fce8c4","#c4ddfc","#c4fce0","#fce0c4","#e8c4fc"] },
+            { label: "T", colors: ["#e8edf5","#e8edf5","#e8edf5","#e8edf5","#e8edf5"] },
+            { label: "A", colors: ["wave","wave","wave","wave","wave"] },
+          ].map((row, i) => (
+            <div key={i} className="flex gap-1.5 mb-1.5 items-center">
+              <div className="w-5 text-[9px] mono text-dim text-center">{row.label}</div>
+              <div className="flex-1 flex gap-1">
+                {row.colors.map((c, j) => (
+                  c === "wave" ? (
+                    <div key={j} className="flex-1 h-5 flex items-center px-1 rounded" style={{ background: "#e8f5e8" }}>
+                      <svg viewBox="0 0 100 16" preserveAspectRatio="none" className="w-full h-4">
+                        {Array.from({ length: 25 }).map((_, k) => {
+                          const h = 4 + Math.abs(Math.sin(k * 0.7 + j * 1.3)) * 10;
+                          return <rect key={k} x={k * 4 + 0.5} y={(16 - h) / 2} width="3" height={h} fill="#16A34A" opacity="0.7"/>;
+                        })}
+                      </svg>
+                    </div>
+                  ) : (
+                    <div key={j} className="flex-1 h-5 rounded flex items-center px-1 text-[8px] truncate" style={{ background: c }}>
+                      {row.label === "T" ? <span className="text-ink/60 truncate">{["We need...","Climate is...","Global problem","We can fix..."][j] || ""}</span> : null}
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          ))}
+          {/* playhead */}
+          <div className="relative h-0">
+            <div className="absolute -top-[68px] bottom-0" style={{ left: "32%", width: "1.5px", background: "#E11D48" }}>
+              <div className="absolute -top-1 -left-1 w-3 h-3 rounded-full bg-c-red" style={{ background: "#E11D48" }}/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== TEAM (Section 3) =====
+function TeamSection({ lang, sharedZone, setSharedZone }) {
+  const tm = DICT.team;
+  const [activeMember, setActiveMember] = useState("ui-a");
+  const member = tm.members.find(m => m.id === activeMember);
+
+  // when active member changes, also reflect on shared zone (first owned)
+  useEffect(() => {
+    if (member && member.owns.length > 0) {
+      setSharedZone(member.owns[0]);
+    }
+  }, [activeMember]);
+
+  return (
+    <section id="team" className="py-24 md:py-32">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(tm.eyebrow, lang)}</div>
+          <h2 className="display text-4xl md:text-6xl max-w-4xl leading-[1.05]">{pick(tm.title, lang)}</h2>
+          <p className="text-ink/65 mt-6 max-w-2xl text-lg">{pick(tm.lede, lang)}</p>
+        </Reveal>
+
+        <Reveal className="mt-14 grid grid-cols-1 lg:grid-cols-5 gap-8">
+          {/* Member list (left) */}
+          <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-1 gap-2">
+            {tm.members.map((m) => {
+              const isOn = m.id === activeMember;
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setActiveMember(m.id)}
+                  className={"flex items-center gap-4 p-4 rounded-2xl border text-left transition " +
+                    (isOn ? "border-ink/40 bg-white shadow-[0_6px_20px_-12px_rgba(14,14,16,0.3)]" : "border-ink/10 bg-white/40 hover:bg-white")}
+                >
+                  <div className="avatar" style={{ background: m.color }}>{m.initials}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="display text-base md:text-lg leading-tight truncate">{pick(m.role, lang)}</div>
+                    <div className="text-[11px] mono uppercase tracking-widest text-dim mt-0.5">
+                      {m.owns.length === 6 ? (lang === "zh" ? "全流程" : "all zones") : m.owns.map(o => DICT.arch.zones.find(z=>z.key===o)?.id).join(" · ")}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mock app on right, with highlight on owned zones */}
+          <div className="lg:col-span-3">
+            <MockApp lang={lang} activeKey={null} highlight={member.owns} onPick={(k) => {
+              // find member that owns this zone
+              const owner = tm.members.find(mm => mm.owns.includes(k) && mm.owns.length < 6);
+              if (owner) setActiveMember(owner.id);
+            }} />
+
+            <div className="surface mt-5 p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="avatar w-12 h-12 text-sm" style={{ background: member.color }}>{member.initials}</div>
+                <div>
+                  <div className="display text-2xl leading-tight">{pick(member.role, lang)}</div>
+                  <div className="text-xs mono uppercase tracking-widest text-dim">{lang === "zh" ? "负责" : "Owns"}</div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {pick(member.duties, lang).map((d, i) => (
+                  <span key={i} className="chip bg-cream text-ink/85 border border-ink/10">{d}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal>
+          <div className="mt-14 text-center display text-xl md:text-2xl text-ink/70 italic">{pick(tm.footnote, lang)}</div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== GOLDEN WORKFLOW (Section 4) =====
+function FlowSection({ lang }) {
+  const f = DICT.flow;
+  const [activeId, setActiveId] = useState(1);
+  const [playing, setPlaying] = useState(false);
+  const node = f.nodes.find(n => n.id === activeId);
+
+  return (
+    <section id="flow" className="py-24 md:py-32 bg-cream/40">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(f.eyebrow, lang)}</div>
+          <h2 className="display text-4xl md:text-6xl max-w-4xl leading-[1.05]">{pick(f.title, lang)}</h2>
+          <p className="text-ink/65 mt-6 max-w-2xl text-lg">{pick(f.lede, lang)}</p>
+        </Reveal>
+
+        {/* Flow row */}
+        <Reveal className="mt-14">
+          <div className="relative">
+            {/* dashed track */}
+            <div className="hidden md:block absolute top-[88px] left-[8%] right-[8%] conn-dash" />
+            {/* packet */}
+            {playing && (
+              <div className="hidden md:block absolute top-[82px] left-[8%] right-[8%]">
+                <div className="relative h-3">
+                  <div className="packet absolute -top-1 w-3 h-3 rounded-full" style={{ background: "#0E0E10", boxShadow: "0 0 0 4px rgba(14,14,16,0.1)" }}/>
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3 relative">
+              {f.nodes.map((n) => {
+                const isOn = activeId === n.id;
+                return (
+                  <button key={n.id} onClick={() => setActiveId(n.id)} className="text-left">
+                    <div className={"relative aspect-square rounded-2xl border-2 transition flex flex-col items-center justify-center p-3 " +
+                      (isOn ? "bg-white" : "bg-white/40 hover:bg-white/80")}
+                      style={{ borderColor: isOn ? n.color : "rgba(14,14,16,0.08)" }}>
+                      <div className="mono text-[10px] tracking-widest mb-1" style={{ color: n.color }}>0{n.id}</div>
+                      <div className="display text-base md:text-lg text-center leading-tight">{pick(n.title, lang)}</div>
+                      <div className="mono text-[10px] text-dim mt-2 text-center">{n.fmt}</div>
+                      {isOn && <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full" style={{ background: n.color }}/>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <button onClick={() => setPlaying(!playing)} className={"btn " + (playing ? "btn-ink" : "")}>
+              {playing ? <><Icon.Pause className="w-3 h-3"/> {pick(f.stopLabel, lang)}</> : <><Icon.Play className="w-3 h-3"/> {pick(f.playLabel, lang)}</>}
+            </button>
+          </div>
+
+          {/* Active node detail */}
+          <div className="mt-10 surface p-7 md:p-9">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <div className="mono text-xs tracking-widest text-dim mb-2">{lang === "zh" ? "节点" : "Node"} 0{node.id}</div>
+                <div className="display text-3xl">{pick(node.title, lang)}</div>
+                <div className="mono text-sm mt-3 inline-block px-2 py-1 rounded" style={{ background: node.color + "15", color: node.color }}>{node.fmt}</div>
+              </div>
+              <div className="border-t md:border-t-0 md:border-l border-ink/10 pt-6 md:pt-0 md:pl-8">
+                <div className="text-xs mono uppercase tracking-widest text-dim mb-2">IN</div>
+                <div className="text-lg display">{pick(node.io.in, lang)}</div>
+              </div>
+              <div className="border-t md:border-t-0 md:border-l border-ink/10 pt-6 md:pt-0 md:pl-8">
+                <div className="text-xs mono uppercase tracking-widest text-dim mb-2">OUT</div>
+                <div className="text-lg display">{pick(node.io.out, lang)}</div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Principles */}
+        <Reveal stagger className="mt-14 grid grid-cols-1 md:grid-cols-5 gap-3">
+          {f.principles.map((p, i) => (
+            <div key={i} className="surface-flat p-5">
+              <div className="text-2xl mb-2">{p.icon}</div>
+              <div className="display text-base mb-1.5">{pick(p.title, lang)}</div>
+              <div className="text-sm text-ink/65 leading-relaxed">{pick(p.body, lang)}</div>
+            </div>
+          ))}
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== DEFINITION OF DONE (Section 5) =====
+function DodSection({ lang }) {
+  const d = DICT.dod;
+  const [checked, setChecked] = useState(Array(d.checklist.zh.length).fill(false));
+  const allDone = checked.every(Boolean);
+  const [expandedCriterion, setExpandedCriterion] = useState(0);
+
+  const toggle = (i) => setChecked(prev => prev.map((v, j) => j === i ? !v : v));
+
+  return (
+    <section id="dod" className="py-24 md:py-32">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(d.eyebrow, lang)}</div>
+          <h2 className="display text-4xl md:text-6xl max-w-4xl leading-[1.05]">{pick(d.title, lang)}</h2>
+          <p className="text-ink/65 mt-6 max-w-2xl text-lg">{pick(d.lede, lang)}</p>
+        </Reveal>
+
+        {/* Criteria cards */}
+        <Reveal stagger className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+          {d.criteria.map((c, i) => {
+            const isOpen = expandedCriterion === i;
+            return (
+              <div key={c.id} onMouseEnter={() => setExpandedCriterion(i)} onClick={() => setExpandedCriterion(i)}
+                className={"relative surface-flat p-5 cursor-pointer transition-all duration-300 " + (isOpen ? "scale-[1.02]" : "")}
+                style={isOpen ? { boxShadow: `inset 0 0 0 1.5px ${c.color}, 0 14px 30px -18px ${c.color}40` } : {}}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white display text-sm font-bold" style={{ background: c.color }}>{i+1}</div>
+                  <div className="text-xl">{c.icon}</div>
+                </div>
+                <div className="display text-lg leading-tight">{pick(c.title, lang)}</div>
+                <ul className="mt-3 space-y-1.5">
+                  {pick(c.bullets, lang).map((b, j) => (
+                    <li key={j} className="text-sm text-ink/70 flex items-start gap-1.5 leading-relaxed">
+                      <span className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0" style={{ background: c.color }}/>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className={"mt-4 pt-3 border-t border-ink/8 transition-all duration-300 overflow-hidden " + (isOpen ? "opacity-100 max-h-40" : "opacity-70 max-h-40")}>
+                  <div className="text-[10px] mono uppercase tracking-widest mb-1" style={{ color: c.color }}>{pick(d.exLabel, lang)}</div>
+                  <div className="text-xs text-ink/70 leading-relaxed">{pick(c.ex, lang)}</div>
+                </div>
+              </div>
+            );
+          })}
+        </Reveal>
+
+        {/* Checklist + warning */}
+        <Reveal className="mt-14 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-7 surface p-7">
+            <div className="flex items-center justify-between mb-5">
+              <div className="display text-2xl">{pick(d.checklistTitle, lang)}</div>
+              <div className="mono text-sm text-dim">{checked.filter(Boolean).length} / {checked.length}</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {pick(d.checklist, lang).map((item, i) => (
+                <button key={i} onClick={() => toggle(i)} className="flex items-start gap-3 p-3 rounded-xl border border-ink/8 hover:border-ink/20 transition text-left">
+                  <span className={"tickbox " + (checked[i] ? "on" : "")}><Icon.Check/></span>
+                  <span className={"text-sm leading-relaxed transition " + (checked[i] ? "line-through text-dim" : "text-ink/85")}>{item}</span>
+                </button>
+              ))}
+            </div>
+            <div className={"mt-5 p-4 rounded-xl transition-all duration-500 flex items-center gap-3 " + (allDone ? "bg-c2/10 text-c2 opacity-100" : "opacity-0 max-h-0 p-0")}>
+              {allDone && <><Icon.Check className="w-5 h-5"/> <span className="display text-base">{pick(d.cheer, lang)}</span></>}
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 p-7 rounded-2xl border" style={{ background: "rgba(220,38,38,0.04)", borderColor: "rgba(220,38,38,0.2)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-full bg-warn text-white flex items-center justify-center" style={{ background: "#DC2626" }}>!</div>
+              <div className="display text-xl" style={{ color: "#DC2626" }}>{pick(d.warnTitle, lang)}</div>
+            </div>
+            <p className="text-ink/70 text-sm leading-relaxed">{pick(d.warnBody, lang)}</p>
+
+            <div className="mt-6 flex items-center gap-3 text-sm">
+              <div className="flex-1 p-3 rounded-lg bg-white border border-ink/10">
+                <div className="flex items-center gap-2">
+                  <Icon.X className="w-4 h-4 text-warn" style={{ color: "#DC2626" }}/>
+                  <div className="text-xs" style={{ color: "#DC2626" }}>{pick(d.pathBad, lang)}</div>
+                </div>
+              </div>
+              <Icon.Arrow className="w-4 h-3 text-dim flex-shrink-0"/>
+              <div className="flex-1 p-3 rounded-lg bg-white border border-ink/10">
+                <div className="flex items-center gap-2">
+                  <Icon.Check className="w-4 h-4" style={{ color: "#16A34A" }}/>
+                  <div className="text-xs" style={{ color: "#16A34A" }}>{pick(d.pathGood, lang)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== WORKING STYLE / DOs & DONTs (Section 6) =====
+function StyleSection({ lang }) {
+  const s = DICT.style;
+  const [hovered, setHovered] = useState(null);
+
+  return (
+    <section id="style" className="py-24 md:py-32 bg-cream/40">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(s.eyebrow, lang)}</div>
+        </Reveal>
+
+        {/* DON'TS */}
+        <Reveal>
+          <div className="flex items-baseline gap-3 mb-3">
+            <h2 className="display text-3xl md:text-5xl" style={{ color: "#DC2626" }}>{pick(s.title_a, lang)}</h2>
+            <Icon.X className="w-6 h-6 md:w-8 md:h-8" style={{ color: "#DC2626" }}/>
+          </div>
+          <p className="text-ink/65 max-w-2xl">{pick(s.lede_a, lang)}</p>
+        </Reveal>
+
+        <Reveal stagger className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {s.donts.map((d, i) => (
+            <div key={i}
+                 onMouseEnter={() => setHovered("d-" + i)}
+                 onMouseLeave={() => setHovered(null)}
+                 className="dont-card rounded-2xl p-5 border relative overflow-hidden"
+                 style={{ background: "white", borderColor: hovered === "d-" + i ? "#DC2626" : "rgba(220,38,38,0.15)" }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="mono text-xs tracking-widest" style={{ color: "#DC2626" }}>{d.num}</div>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ background: "#DC2626" }}><Icon.X className="w-3.5 h-3.5"/></div>
+              </div>
+              <div className="display text-xl leading-tight">{pick(d.title, lang)}</div>
+
+              {/* speech bubbles */}
+              <div className="mt-4 space-y-1.5">
+                {pick(d.quotes, lang).slice(0, 3).map((q, j) => (
+                  <div key={j} className="inline-block bg-ink/5 text-ink/70 text-xs rounded-2xl rounded-tl-sm px-3 py-1.5 mr-1.5">"{q}"</div>
+                ))}
+                {pick(d.quotes, lang).length > 3 && <div className="text-xs text-dim mt-1">+{pick(d.quotes, lang).length - 3} {lang === "zh" ? "更多" : "more"}</div>}
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-ink/8 text-sm" style={{ color: "#DC2626" }}>
+                <span className="mono text-[10px] tracking-widest uppercase">{lang === "zh" ? "代价" : "Cost"}</span>
+                <div className="mt-0.5">{pick(d.cost, lang)}</div>
+              </div>
+            </div>
+          ))}
+        </Reveal>
+
+        {/* DO'S */}
+        <div className="mt-24">
+          <Reveal>
+            <div className="flex items-baseline gap-3 mb-3">
+              <h2 className="display text-3xl md:text-5xl" style={{ color: "#16A34A" }}>{pick(s.title_b, lang)}</h2>
+              <Icon.Check className="w-6 h-6 md:w-8 md:h-8" style={{ color: "#16A34A" }}/>
+            </div>
+            <p className="text-ink/65 max-w-2xl">{pick(s.lede_b, lang)}</p>
+          </Reveal>
+
+          <Reveal stagger className="mt-10 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {s.dos.map((d, i) => (
+              <div key={i} className="do-card rounded-2xl p-5 relative bg-white border" style={{ borderColor: "rgba(22,163,74,0.2)" }}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="mono text-xs tracking-widest" style={{ color: "#16A34A" }}>{d.num}</div>
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ background: "#16A34A" }}><Icon.Check className="w-3.5 h-3.5"/></div>
+                </div>
+                <div className="display text-base md:text-lg leading-tight">{pick(d.title, lang)}</div>
+                <div className="text-xs text-ink/70 mt-2 leading-relaxed">{pick(d.body, lang)}</div>
+                {i < s.dos.length - 1 && (
+                  <div className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 z-10">
+                    <Icon.Arrow className="w-4 h-3" style={{ color: "#16A34A" }}/>
+                  </div>
+                )}
+              </div>
+            ))}
+          </Reveal>
+        </div>
+
+        {/* Core principles + remember + goal */}
+        <Reveal className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="surface p-7 md:col-span-1">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-2xl">⭐</span>
+              <div className="display text-xl" style={{ color: "#16A34A" }}>{pick(s.core.title, lang)}</div>
+            </div>
+            <ul className="space-y-3">
+              {pick(s.core.items, lang).map((it, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-ink/80 leading-relaxed">
+                  <Icon.Check className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#16A34A" }}/>
+                  <span>{it}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="surface p-7 md:col-span-1" style={{ background: "#FEF3C7", border: "1px solid #F59E0B30" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">💡</span>
+              <div className="display text-xl">{pick(s.remember.title, lang)}</div>
+            </div>
+            <p className="text-ink/85 leading-relaxed text-[15px]">{pick(s.remember.body, lang)}</p>
+          </div>
+
+          <div className="surface p-7 md:col-span-1" style={{ background: "#DCFCE7", border: "1px solid #16A34A30" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">🎯</span>
+              <div className="display text-xl" style={{ color: "#16A34A" }}>{pick(s.goal.title, lang)}</div>
+            </div>
+            <p className="text-ink/85 leading-relaxed text-[15px]">{pick(s.goal.body, lang)}</p>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== PROMPTS (Section 7) =====
+function PromptsSection({ lang }) {
+  const p = DICT.prompts;
+  const [tab, setTab] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const cur = p.tabs[tab];
+
+  const copySample = () => {
+    const text = cur.sample[lang].join("\n");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      });
+    } else {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    }
+  };
+
+  return (
+    <section id="prompts" className="py-24 md:py-32">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
+        <Reveal>
+          <div className="stamp mb-5">{pick(p.eyebrow, lang)}</div>
+          <h2 className="display text-4xl md:text-6xl max-w-4xl leading-[1.05]">{pick(p.title, lang)}</h2>
+          <p className="text-ink/65 mt-6 max-w-2xl text-lg">{pick(p.lede, lang)}</p>
+        </Reveal>
+
+        {/* Tabs */}
+        <Reveal className="mt-12">
+          <div className="tab-row max-w-xl">
+            {p.tabs.map((t, i) => (
+              <button key={t.key} className={tab === i ? "active" : ""} onClick={() => { setTab(i); setCopied(false); }}
+                      style={tab === i ? { color: t.color } : {}}>
+                <span className="mono text-[10px] tracking-widest opacity-60 mr-1.5">0{i+1}</span>
+                {pick(t.label, lang)}
+              </button>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left: intent + flow */}
+          <div className="lg:col-span-5">
+            <div className="surface p-7">
+              <div className="display text-2xl mb-2 leading-tight" style={{ color: cur.color }}>{pick(cur.label, lang)}</div>
+              <p className="text-ink/75 leading-relaxed">{pick(cur.intent, lang)}</p>
+
+              <div className="mt-7">
+                <div className="mono text-[10px] uppercase tracking-widest text-dim mb-3">{lang === "zh" ? "流程" : "Flow"}</div>
+                <div className="space-y-2">
+                  {cur.flow.map((f, i) => (
+                    <Fragment key={i}>
+                      <div className="flex items-center gap-3 p-3 rounded-xl border" style={{ background: cur.color + "08", borderColor: cur.color + "30" }}>
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-white display text-xs" style={{ background: cur.color }}>{i+1}</div>
+                        <div className="text-sm font-medium">{pick(f, lang)}</div>
+                      </div>
+                      {i < cur.flow.length - 1 && (
+                        <div className="flex justify-center"><Icon.Arrow className="w-3.5 h-2.5 text-dim" style={{ transform: "rotate(90deg)" }}/></div>
+                      )}
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-7 pt-5 border-t border-ink/8">
+                <div className="mono text-[10px] uppercase tracking-widest text-dim mb-1">{pick(p.goalLabel, lang)}</div>
+                <div className="text-sm text-ink/80 leading-relaxed">{pick(cur.goal, lang)}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: code */}
+          <div className="lg:col-span-7">
+            <div className="prompt-box relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/15"/>
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/15"/>
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/15"/>
+                </div>
+                <div className="mono text-[10px] tracking-widest text-white/40 uppercase">prompt · {cur.key}</div>
+                <button onClick={copySample} className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white transition">
+                  {copied ? <Icon.Check className="w-3 h-3"/> : <Icon.Copy className="w-3 h-3"/>}
+                  {copied ? pick(p.copied, lang) : pick(p.copy, lang)}
+                </button>
+              </div>
+              <pre className="whitespace-pre-wrap text-[13px] leading-[1.75] font-mono">
+                {cur.sample[lang].map((line, i) => {
+                  // syntax highlighting hints
+                  let cls = "";
+                  if (/^\d+\./.test(line.trim())) cls = "num";
+                  else if (line.trim().endsWith(":")) cls = "kw";
+                  else if (line.includes("\"") || /["“”]/.test(line)) cls = "accent";
+                  return <div key={i} className={cls}>{line || "\u00A0"}</div>;
+                })}
+              </pre>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Principles */}
+        <Reveal className="mt-16">
+          <div className="display text-2xl mb-5">{pick(p.principlesTitle, lang)}</div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            {p.principles.map((pr, i) => (
+              <div key={i} className="surface-flat p-5">
+                <div className="mono text-xs tracking-widest text-dim mb-2">0{i+1}</div>
+                <div className="display text-lg mb-1">{pick(pr.title, lang)}</div>
+                <div className="text-sm text-ink/65 leading-relaxed">{pick(pr.body, lang)}</div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== CLOSE =====
+function CloseSection({ lang }) {
+  const c = DICT.close;
+  return (
+    <section className="py-28 md:py-40 relative overflow-hidden border-t border-ink/10" style={{ background: "#0E0E10", color: "#FAF8F2" }}>
+      <div className="absolute inset-0 dotgrid opacity-10"/>
+      <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] rounded-full floaty-slow"
+           style={{ background: "radial-gradient(circle, rgba(124,58,237,0.25), transparent 70%)" }}/>
+      <div className="absolute -bottom-32 right-1/4 w-[500px] h-[500px] rounded-full floaty"
+           style={{ background: "radial-gradient(circle, rgba(22,163,74,0.18), transparent 70%)" }}/>
+
+      <div className="relative max-w-5xl mx-auto px-5 md:px-8 text-center">
+        <Reveal>
+          <div className="mono text-xs uppercase tracking-widest text-white/50 mb-7">{pick(c.eyebrow, lang)}</div>
+        </Reveal>
+        <Reveal>
+          <h2 className="display text-4xl md:text-6xl leading-[1.05] max-w-4xl mx-auto">{pick(c.title, lang)}</h2>
+        </Reveal>
+        <Reveal>
+          <p className="mt-7 text-lg md:text-xl text-white/65 max-w-2xl mx-auto leading-relaxed">{pick(c.body, lang)}</p>
+        </Reveal>
+        <Reveal>
+          <div className="mt-12 flex items-center justify-center gap-3">
+            <a href="#top" className="btn" style={{ background: "white", color: "#0E0E10", borderColor: "white" }}>
+              ↑ {pick(c.back, lang)}
+            </a>
+          </div>
+        </Reveal>
+        <Reveal>
+          <div className="mt-20 pt-8 border-t border-white/10 text-xs mono uppercase tracking-widest text-white/40">{pick(c.sign, lang)} · 2026</div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ===== APP =====
+function App() {
+  const [lang, setLang] = useState("zh");
+  const [sharedZone, setSharedZone] = useState("topnav");
+
+  useScrollProgress();
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+    document.body.classList.toggle("lang-zh", lang === "zh");
+    document.body.classList.toggle("lang-en", lang === "en");
+  }, [lang]);
+
+  return (
+    <LangCtx.Provider value={{ lang }}>
+      <div className="relative">
+        <Nav lang={lang} setLang={setLang} />
+        <main>
+          <Hero lang={lang} />
+          <DemoSection lang={lang} />
+          <ArchSection lang={lang} sharedZone={sharedZone} setSharedZone={setSharedZone} />
+          <TeamSection lang={lang} sharedZone={sharedZone} setSharedZone={setSharedZone} />
+          <FlowSection lang={lang} />
+          <DodSection lang={lang} />
+          <StyleSection lang={lang} />
+          <PromptsSection lang={lang} />
+          <CloseSection lang={lang} />
+        </main>
+      </div>
+    </LangCtx.Provider>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+
+  </script>
+</body>
+</html>
