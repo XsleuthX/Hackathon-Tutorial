@@ -440,14 +440,14 @@ const DICT = {
     steps: [
       { num: "01", color: "c1", title: { zh: "导入素材", en: "Import assets" }, blurb: { zh: "把原始视频和补充素材拖进项目里。", en: "Drop the raw video and supporting assets into the project." }, detail: { zh: "支持 mp4 / mov，多文件批量导入。素材以缩略图列出，第一帧自动抽取作为封面。", en: "Supports mp4 / mov, batch import. Assets appear as thumbnails with first-frame auto-cover." } },
       { num: "02", color: "c2", title: { zh: "生成字幕", en: "Generate subtitles" }, blurb: { zh: "AI 把对话转成 .srt 字幕文件。", en: "AI turns speech into a .srt subtitle file." }, detail: { zh: "Whisper 提供初稿，每条字幕带时间码。准确率不重要——下一步会校准。", en: "Whisper drafts it, each cue carries a timecode. Accuracy isn't critical — next step calibrates." } },
-      { num: "03", color: "c3", title: { zh: "对齐字幕", en: "Align subtitles" }, blurb: { zh: "把字幕时间和音频精确对齐。", en: "Snap subtitle timing to the audio precisely." }, detail: { zh: "Qwen 强制对齐解决初稿时间漂移。中文以二元词为锚点，避免词起始偏晚。", en: "Qwen forced-alignment fixes drift. Chinese uses bigram boundaries to counter late-onset bias." } },
-      { num: "04", color: "c4", title: { zh: "翻译字幕", en: "Translate subtitles" }, blurb: { zh: "本地翻译，无 API key。", en: "Translate locally, no API key." }, detail: { zh: "用 argostranslate 离线翻译，保留原 .srt 时间码，输出双语字幕文件。", en: "argostranslate offline. Keeps original .srt timecodes, outputs a bilingual subtitle file." } },
-      { num: "05", color: "c5", title: { zh: "故事组装", en: "Story assembly" }, blurb: { zh: "把字幕重排成故事卡片。", en: "Rearrange cues into story cards." }, detail: { zh: "在 Google Doc 或卡片视图里拖拽，决定每个段落讲什么。结构以 JSON 保存。", en: "Drag in Google Doc or the card view to decide what each beat says. Saved as structured JSON." } },
+      { num: "03", color: "c3", title: { zh: "匹配字幕", en: "Align subtitles" }, blurb: { zh: "把TXT文字和音频对齐。", en: "Snap subtitle timing to the audio precisely." }, detail: { zh: "Qwen 强制对齐解决初稿时间漂移。中文以二元词为锚点，避免词起始偏晚。", en: "Qwen forced-alignment fixes drift. Chinese uses bigram boundaries to counter late-onset bias." } },
+      { num: "04", color: "c4", title: { zh: "翻译字幕", en: "Translate subtitles" }, blurb: { zh: "连接API，AI翻译字幕。", en: "Connect API, AI Translate SRT." }, detail: { zh: "用DeepSeek翻译，保留原 .srt 时间码，输出双语字幕文件。", en: "DeepSeek Translate. Keeps original .srt timecodes, outputs a bilingual subtitle file." } },
+      { num: "05", color: "c5", title: { zh: "故事组装", en: "Story assembly" }, blurb: { zh: "把视频切片，重新组装。", en: "Rearrange cue clips into story assembly." }, detail: { zh: "在 Google Doc 或卡片视图里拖拽，决定每个段落讲什么。结构以 JSON 保存。", en: "Drag in Google Doc or the card view to decide what each beat says. Saved as structured JSON." } },
       { num: "06", color: "c3", title: { zh: "时间线编辑", en: "Timeline editing" }, blurb: { zh: "多轨视频 / 字幕 / 音频。", en: "Multi-track video / subtitle / audio." }, detail: { zh: "支持剪刀、吸附、HH:MM:SS:FF 时间码、波形渲染、字幕轨道对齐。", en: "Cut tool, snap, HH:MM:SS:FF timecode, waveform rendering, subtitle-track alignment." } },
       { num: "07", color: "c4", title: { zh: "导出视频 + 字幕", en: "Export video + subs" }, blurb: { zh: "成片配嵌入字幕，或外挂 .srt。", en: "Final cut with burned-in or sidecar .srt." }, detail: { zh: "横版 16:9 或竖版 9:16，可选烧录字幕，同时输出 .mp4 + .srt + 元数据 .json。", en: "16:9 or 9:16, optional burn-in subs, outputs .mp4 + .srt + metadata .json together." } },
       { num: "08", color: "c2", title: { zh: "上传到 YouTube", en: "Upload to YouTube" }, blurb: { zh: "标题、描述、字幕一键发布。", en: "Title, description, subtitle — one click." }, detail: { zh: "走 YouTube Data API，附带 SRT 作为字幕轨。失败可重试，不会丢成片。", en: "Via YouTube Data API, attaches SRT as a caption track. Retryable, never loses the cut." } },
     ],
-    closing: { zh: "整个流程的目标：几分钟，不是几天。", en: "The whole flow's goal: minutes, not days." },
+    closing: { zh: "整个流程的目标：在统一平台，同步编辑视频的字幕和编排。", en: "The Goal: A Collaborative Platform for Video SRT Editing and Assenbly." },
   },
 
   // ----- APP ARCHITECTURE (Image 5) -----
@@ -481,7 +481,7 @@ const DICT = {
     lede: { zh: "点头像，看 TA 的地盘。", en: "Click an avatar to light up their turf." },
     members: [
       { id: "ui-a",  color: "#7C3AED", initials: "U·A", role: { zh: "UI 设计师 A", en: "UI Designer A" }, owns: ["topnav", "preview"], duties: { zh: ["整体布局", "导航结构", "视频预览区"], en: ["Overall layout", "Nav structure", "Video preview"] } },
-      { id: "fn-a",  color: "#0EA5E9", initials: "F·A", role: { zh: "功能工程师 A", en: "Functional Engineer A" }, owns: ["subs"], duties: { zh: ["转录", "对齐", "翻译"], en: ["Transcription", "Alignment", "Translation"] } },
+      { id: "fn-a",  color: "#0EA5E9", initials: "F·A", role: { zh: "功能工程师 A", en: "Functional Engineer A" }, owns: ["subs"], duties: { zh: ["转录", "匹配", "翻译"], en: ["Transcription", "Alignment", "Translation"] } },
       { id: "ui-b",  color: "#16A34A", initials: "U·B", role: { zh: "UI 设计师 B", en: "UI Designer B" }, owns: ["story"], duties: { zh: ["故事组装界面", "卡片设计", "素材管理"], en: ["Story-assembly UI", "Card design", "Asset management"] } },
       { id: "fn-b",  color: "#E11D48", initials: "F·B", role: { zh: "功能工程师 B", en: "Functional Engineer B" }, owns: ["timeline"], duties: { zh: ["时间线编辑", "剪辑处理", "字幕 / 音频"], en: ["Timeline editor", "Cut & edit", "Subtitle / audio"] } },
       { id: "be",    color: "#F59E0B", initials: "B·E", role: { zh: "后端工程师", en: "Backend Engineer" }, owns: ["export"], duties: { zh: ["接口 / 数据", "存储管理", "第三方服务", "发布集成"], en: ["Interfaces / data", "Storage", "Third-party services", "Publish integration"] } },
